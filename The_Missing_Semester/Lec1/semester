@@ -1,0 +1,4 @@
+#!/bin/sh
+curl --head --silent https://missing.csail.mit.edu
+
+#echo -e '#!/bin/sh\ncurl --head --silent https://missing.csail.mit.edu' > ex5

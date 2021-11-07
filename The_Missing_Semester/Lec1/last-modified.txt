@@ -1,0 +1,2 @@
+last-modified: Sat, 06 Nov 2021 18:58:02 GMT
+#./semester | grep -i "last-modified" > last-modified.txt
