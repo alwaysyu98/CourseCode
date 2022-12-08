@@ -117,3 +117,227 @@
       (helper n 1))))
 (fact 0)
 (fact 5)
+
+; 11. Define and test a procedure memv that takes an element and a list and returns the first cdr whose car is eqv? to the element, or #f if the element is absent from the list.
+(define memv
+  (lambda (a b)
+    (cond
+      ((null? b) #f)
+      ((eqv? (car b) a) b)
+      (else (memv a (cdr b))))))
+(memv 'a '(a b c))
+(memv 'b '(a ? c))
+(memv 'b '(a b c b))
+
+; 12. Define and test a procedure fib that takes a natural number n as input and computes the nth number, starting from zero, in the Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, 13, 21, …). Each number in the sequence is computed by adding the two previous numbers.
+(define fib
+  (lambda (n)
+    (letrec
+        ((helper (lambda (a b n)
+                   (cond
+                     ((zero? n) a)
+                     (else (helper b (+ a b) (sub1 n)))))))
+      (helper 0 1 n))))
+(fib 0)
+(fib 1)
+(fib 7)
+
+; 13. The expressions (a b) and (a . (b . ())) are equivalent. Using this knowledge, rewrite the expression ((w x) y (z)) using as many dots as possible. Be sure to test your solution using Racket's equal? predicate. (You do not have to define a rewrite procedure; just rewrite the given expression by hand and place it in a comment.)
+(equal? '(a b) '(a . (b . ())))
+(equal? '((w x) y (z)) '((w . (x . ())) . (y . ((z . ())))))
+
+; 14. Define and test a procedure binary->natural that takes a flat list of 0s and 1s representing an unsigned binary number in reverse bit order and returns that number.
+(define binary->natural
+  (lambda (a)
+    (letrec
+        ((helper (lambda (a pow res)
+                   (cond
+                     ((null? a) res)
+                     ((eqv? (car a) 1) (helper (cdr a) (* 2 pow) (+ pow res)))
+                     (else (helper (cdr a) (* 2 pow) res))))))
+      (helper a 1 0))))
+(binary->natural '())
+(binary->natural '(0 0 1))
+(binary->natural '(0 0 1 1))
+
+; 15. Define subtraction using natural recursion. Your subtraction function, minus, need only take nonnegative inputs where the result will be nonnegative.
+(define minus
+  (lambda (x y)
+    (cond
+      ((zero? y) x)
+      (else (minus (sub1 x) (sub1 y))))))
+(minus 5 3)
+(minus 100 50)
+
+; 16. Define division using natural recursion. Your division function, div, need only work when the second number evenly divides the first. Division by zero is of course bad data.
+(define div
+  (lambda (x y)
+    (cond
+      ((zero? x) 0)
+      ((+ 1 (div (- x y) y))))))
+(div 25 5)
+(div 36 6)
+
+; 17. Define a function append-map that, similar to map, takes both a procedure p of one argument a list of inputs ls and applies p to each of the elements of ls. Here, though, we mandate that the result of p on each element of ls is a list, and we append together the intermediate results. Do not use Racket's built-in append-map in your definition.
+(define append-map
+  (lambda (a b)
+    (cond
+      ((null? b) '())
+      (else (append (a (car b)) (append-map a (cdr b)))))))
+(append-map countdown (countdown 5))
+
+; 18. Define a function set-difference that takes two flat sets (lists with no duplicate elements) s1 and s2 and returns a list containing all the elements in s1 that are not in s2.
+(define set-difference
+  (lambda (a b)
+    (letrec
+        ((helper (lambda (a b)
+                   (cond
+                     ((null? b) #t)
+                     ((eqv? (car b) a) #f)
+                     (else (helper a (cdr b)))))))
+      (cond
+        ((null? a) '())
+        ((helper (car a) b) (cons (car a) (set-difference (cdr a) b)))
+        (else (set-difference (cdr a) b))))))
+(set-difference '(1 2 3 4 5) '(2 4 6 8))
+
+; 19. In mathematics, the power set of any set S, denoted P(S), is the set of all subsets of S, including the empty set and S itself.
+(define powerset
+  (lambda (a)
+    (cond
+      ((null? a) '(()))
+      (else (append (map
+                     (lambda (x) (cons (car a) x))
+                     (powerset (cdr a)))
+                    (powerset (cdr a)))))))
+(powerset '(3 2 1))
+(powerset '())
+
+; 20. The cartesian-product is defined over a list of sets (again simply lists that by our agreed upon convention don't have duplicates). The result is a list of tuples (i.e. lists). Each tuple has in the first position an element of the first set, in the second position an element of the second set, etc. The output list should contains all such combinations. The exact order of your tuples may differ; this is acceptable.
+(define cartesian-product
+  (lambda (a)
+    (letrec
+        ((helper (lambda (a b)
+                   (cond
+                     ((null? a) '())
+                     (else (append
+                            (map (lambda (x) (cons (car a) (cons x '()))) b)
+                            (helper (cdr a) b)))))))
+      (helper (car a) (car (cdr a))))))
+(cartesian-product '((5 4) (3 2 1)))
+(cartesian-product '((7 6 5) (3 2)))
+                   
+; 21. Rewrite some of the natural-recursive programs from above instead using foldr. That is, the bodies of your definitions should not refer to themselves. The names should be the following:
+(define insertR-fr
+  (lambda (a b c)
+    (foldr (lambda (x result)
+             (cond
+               ((eq? a x) (cons a (cons b result)))
+               (else (cons x result)))) '() c)))
+(insertR-fr 'x 'y '(x z z x y x))
+
+(define filter-fr
+  (lambda (a b)
+    (foldr (lambda (x result)
+             (cond
+               ((a x) (cons x result))
+               (else result))) '() b)))
+(filter-fr even? '(1 2 3 4 5 6))
+
+(define map-fr
+  (lambda (a b)
+    (foldr (lambda (x result)
+             (cons (a x) result)) '() b)))
+(map-fr add1 '(1 2 3 4))
+
+(define append-fr
+  (lambda (a b)
+    (foldr cons b a)))
+(append-fr '(a b c) '(1 2 3))
+
+(define reverse-fr
+  (lambda (a)
+    (foldr (lambda (x result)
+             (append result (cons x '()))) '() a)))
+(reverse-fr '(a 3 x))
+
+(define binary->natural-fr
+  (lambda (a)
+    (foldr (lambda (x y)
+             (+ x (* 2 y))) 0 a)))
+(binary->natural-fr '())
+(binary->natural-fr '(0 0 1))
+(binary->natural-fr '(0 0 1 1))
+
+(define append-map-fr
+  (lambda (a b)
+    (foldr (lambda (x result)
+             (append (a x) result)) '() b)))
+(append-map-fr countdown (countdown 5))
+
+(define set-difference-fr
+  (lambda (a b)
+    (foldr (lambda (x result1)
+             (cond
+               ((foldr (lambda (y result2)
+                      (cond
+                        ((eq? y x) #f)
+                        (else result2))) #t b) (cons x result1))
+               (else result1))) '() a)))
+(set-difference-fr '(1 2 3 4 5) '(2 4 6))
+
+(define powerset-fr
+  (lambda (a)
+    (foldr (lambda (x result1)
+             (append (foldr (lambda (y result2)
+                              (cons (cons x y) result2)) '() result1) result1)) '(()) a)))
+(powerset-fr '(3 2 1))
+(powerset-fr '())
+
+(define cartesian-product-fr
+  (lambda (a)
+    (letrec
+        ((helper (lambda (a b)
+                   (foldr (lambda (x result1)
+                            (append (foldr (lambda (y result2)
+                                             (cons (cons x (cons y '())) result2)) '() b) result1)) '() a))))
+      (helper (car a) (car (cdr a))))))
+(cartesian-product-fr '((5 4) (3 2 1)))
+
+; 22. Consider a function f defined as below
+(define collatz
+  (letrec
+    ((odd-case
+       (lambda (recur)
+         (lambda (x)
+           (cond 
+            ((and (positive? x) (odd? x)) (collatz (add1 (* x 3)))) 
+            (else (recur x))))))
+     (even-case
+       (lambda (recur)
+         (lambda (x)
+           (cond 
+            ((and (positive? x) (even? x)) (collatz (/ x 2))) 
+            (else (recur x))))))
+     (one-case
+       (lambda (recur)
+         (lambda (x)
+           (cond
+            ((zero? (sub1 x)) 1)
+            (else (recur x))))))
+     (base
+       (lambda (x)
+         (error 'error "Invalid value ~s~n" x))))
+    (one-case (odd-case (even-case base)))
+    ))
+(collatz 12)
+(collatz 120)
+(collatz 9999)
+
+; 21. A quine is a program whose output is the listings (i.e. source code) of the original program. In Racket, 5 and #t are both quines.
+; ((lambda (x) (list x (list 'quote x))) '(lambda (x) (list x (list 'quote x))))
+(define quine
+  ((lambda (x) (list x (list 'quote x))) '(lambda (x) (list x (list 'quote x)))))
+
+(equal? quine (eval quine))
+(equal? quine (eval (eval quine)))
