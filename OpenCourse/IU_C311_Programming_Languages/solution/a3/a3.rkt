@@ -33,12 +33,6 @@
             [`(begin2 ,x ,y) `,(begin (value-of x env) (value-of y env))] ;begin2
             )))
 
-(value-of
- '((lambda (x)
-     (begin2 (set! x 5) x))
-   6)
- (lambda (y) (error 'value-of "unbound variable ~s" y)))
-
 ; value-of-fn
 ; treat env as a function
 (define empty-env-fn
@@ -71,6 +65,7 @@
             [`(let ([,id ,arg]) ,body) `,(value-of-fn body (extend-env-fn id (value-of-fn arg env) env))] ; let
             )))
 
+(value-of-fn '((lambda (y) (((lambda (y) (lambda (x) (* y 2))) 3) 0)) 4)  '())
 ; value-of-ds
 ; treat env as a list
 (define empty-env-ds
@@ -173,5 +168,5 @@
                                  (cons (f x1) x1))))
                        (cons zero zero)))])
           x2)))))
-(((csub1 c5) add1) 0)
-(((csub1 c0) add1) 0)
+; (((csub1 c5) add1) 0)
+; (((csub1 c0) add1) 0)
