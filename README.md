@@ -6,6 +6,7 @@ This repo includes things I'm interested in.
 - [MIT 6.824](https://pdos.csail.mit.edu/6.824/schedule.html)
 - [MIT The Missing Semester](https://missing.csail.mit.edu/)
 - [IU C311](https://cgi.luddy.indiana.edu/~c311/doku.php)
+- [IIITH PoPL](https://faculty.iiit.ac.in/~venkatesh.choppella/popl/)
 
 ## Coursera
 - [Functional Programming in Scala Specialization](https://www.coursera.org/specializations/scala)
